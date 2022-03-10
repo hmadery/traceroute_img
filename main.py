@@ -16,36 +16,43 @@ from scapy.layers.inet import IP
 from scapy.layers.inet import ICMP
 import scapy.sendrecv
 
-host = "dns.google"
-path = []
 
-for i in range(1, 64):
-    pkt = IP(dst=host, ttl=i)/ICMP(type="echo-request")
-    rcv = scapy.sendrecv.sr1(pkt, verbose=False, timeout=1)
-    if rcv:
-        try:
-            hostname = socket.gethostbyaddr(rcv[0].src)[0]
-        except:
-            hostname = "***"
-        print(f"hop{i} : {rcv[0].src}  -  {hostname}")
-        try:
-            geo_rlt = json.loads(requests.get("http://ip-api.com/json/"+str(rcv[0].src)+"?fields=country,lat,lon").content)
-            country = geo_rlt["country"]
-            lat = geo_rlt["lat"]
-            lon = geo_rlt["lon"]
-            path.append((round(lon*5+900),round(900-(lat*5+450))))
-            print(country+" : "+str(lat)+" / "+str(lon)+"\n")
-        except:
-            print("***\n")
-        if hostname == host:
-            break
-    else:
-        print(f'{i} timeout.')
+# main
+def main() :
 
-# draw the path
-img = Image.open("simplemap.png")
-draw = ImageDraw.Draw(img)
-draw.line(path, fill="red", width=5)
-img.show()
+    host = "dns.google"
+    path = []
 
-print("Done.")
+    for i in range(1, 64):
+        pkt = IP(dst=host, ttl=i)/ICMP(type="echo-request")
+        rcv = scapy.sendrecv.sr1(pkt, verbose=False, timeout=1)
+        if rcv:
+            try:
+                hostname = socket.gethostbyaddr(rcv[0].src)[0]
+            except:
+                hostname = "***"
+            print(f"hop{i} : {rcv[0].src}  -  {hostname}")
+            try:
+                geo_rlt = json.loads(requests.get("http://ip-api.com/json/"+str(rcv[0].src)+"?fields=country,lat,lon").content)
+                country = geo_rlt["country"]
+                lat = geo_rlt["lat"]
+                lon = geo_rlt["lon"]
+                path.append((round(lon*5+900),round(900-(lat*5+450))))
+                print(country+" : "+str(lat)+" / "+str(lon)+"\n")
+            except:
+                print("***\n")
+            if hostname == host:
+                break
+        else:
+            print(f'hop{i} timeout.')
+
+    # draw the path
+    img = Image.open("simplemap.png")
+    draw = ImageDraw.Draw(img)
+    draw.line(path, fill="red", width=5)
+    img.show()
+
+    print("Done.")
+
+if __name__ == "__main__":
+    main()
