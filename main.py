@@ -43,10 +43,8 @@ for i in range(1, 64):
         print(f'{i} timeout.')
 
 # draw the path
-img = Image.open("./img/simplemap.png")
-print(img.size)
+img = Image.open("simplemap.png")
 draw = ImageDraw.Draw(img)
-print(path)
 draw.line(path, fill="red", width=5)
 img.show()
 
