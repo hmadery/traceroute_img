@@ -6,6 +6,8 @@
 # placement des coordonnées incorrectes
 
 # imports
+import string
+import sys
 import socket
 import json
 import requests
@@ -18,9 +20,14 @@ import scapy.sendrecv
 
 
 # main
-def main() :
+def main(mhost: string) :
 
-    host = "dns.google"
+    host = mhost
+
+    # convert
+    if sys.argv[2] == "N":
+        host = socket.gethostbyname(host)
+
     path = []
 
     for i in range(1, 64):
@@ -28,9 +35,9 @@ def main() :
         rcv = scapy.sendrecv.sr1(pkt, verbose=False, timeout=1)
         if rcv:
             try:
-                hostname = socket.gethostbyaddr(rcv[0].src)[0]
+                hostname = socket.gethostbyaddr(host)
             except:
-                hostname = "***"
+                hostname = ["*","*","*"]
             print(f"hop{i} : {rcv[0].src}  -  {hostname}")
             try:
                 geo_rlt = json.loads(requests.get("http://ip-api.com/json/"+str(rcv[0].src)+"?fields=country,lat,lon").content)
@@ -41,18 +48,21 @@ def main() :
                 print(country+" : "+str(lat)+" / "+str(lon)+"\n")
             except:
                 print("***\n")
-            if hostname == host:
-                break
+            if rcv[0].src == host:
+                img = Image.open("simplemap.png")
+                draw = ImageDraw.Draw(img)
+                draw.line(path, fill="red", width=5)
+                img.show()
+                return 0
         else:
             print(f'hop{i} timeout.')
 
+    return 0
+
     # draw the path
-    img = Image.open("simplemap.png")
-    draw = ImageDraw.Draw(img)
-    draw.line(path, fill="red", width=5)
-    img.show()
+    
 
     print("Done.")
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1])
