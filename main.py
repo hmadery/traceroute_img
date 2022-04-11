@@ -1,11 +1,8 @@
-### Notes
-# dépend d'une API gratuite ip-aoi
-# il faut apprendre à dessiner sur une carte import PIL ?
-# recherche changement de route / métrique ? à chaque ping 
-### Debug
-# placement des coordonnées incorrectes
+# to do
+# add pygame animation option ? or gif with PIL ?
 
 # imports
+from decimal import MIN_ETINY
 import string
 import sys
 import socket
@@ -17,18 +14,21 @@ from PIL import Image, ImageDraw
 from scapy.layers.inet import IP
 from scapy.layers.inet import ICMP
 import scapy.sendrecv
+# img tmp names
+import string
+import random
 
 
 # main
 def main(mhost: string) :
 
     host = mhost
+    path = []
+    img_list = []
 
     # convert
     if sys.argv[2] == "N":
         host = socket.gethostbyname(host)
-
-    path = []
 
     for i in range(1, 64):
         pkt = IP(dst=host, ttl=i)/ICMP(type="echo-request")
@@ -51,18 +51,40 @@ def main(mhost: string) :
             if rcv[0].src == host:
                 img = Image.open("simplemap.png")
                 draw = ImageDraw.Draw(img)
-                draw.line(path, fill="red", width=5)
+                draw.line(path, fill="red", width=2)
                 img.show()
+                #gif
+                md = 0
+                for i in range(len(path)-1) :
+                    # pythagore
+                    md_x = path[i+1][0] - path[i][0]
+                    md_y = path[i+1][1] - path[i][1]
+                    d = (md_x ** 2 + md_y ** 2) ** 0.5
+                    hops = round(d // 10 + 1)
+                    m_x = md_x / hops
+                    m_y = md_y / hops
+                    for h in range(hops) :
+                        img_tmp = Image.open("simplemap.png")
+                        draw_tmp = ImageDraw.Draw(img_tmp)
+                        draw_tmp.ellipse((path[i][0]+m_x*h-10, path[i][1]+m_y*h-10, path[i][0]+m_x*h+10, path[i][1]+m_y*h+10), fill = 'red', outline ='red')
+                        # name generation
+                        letters = string.ascii_uppercase
+                        gname = ''.join(random.choice(letters) for i in range(10))
+                        img_tmp.save("./tmp/"+gname+".png")
+                        img_list.append(gname)
+                    md += d
+                print(md)
+                for i in range(img_list):
+                    
+
                 return 0
         else:
             print(f'hop{i} timeout.')
 
     return 0
 
-    # draw the path
-    
-
-    print("Done.")
-
 if __name__ == "__main__":
-    main(sys.argv[1])
+    if len(sys.argv) != 3 :
+        print("This command needs 2 arguments.")
+    else :
+        main(sys.argv[1])
