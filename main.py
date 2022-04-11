@@ -2,12 +2,13 @@
 # add pygame animation option ? or gif with PIL ?
 
 # imports
-from decimal import MIN_ETINY
+import random
 import string
 import sys
 import socket
 import json
 import requests
+import os
 # img
 from PIL import Image, ImageDraw
 # minimal scapy import (can be optimise ?)
@@ -52,7 +53,7 @@ def main(mhost: string) :
                 img = Image.open("simplemap.png")
                 draw = ImageDraw.Draw(img)
                 draw.line(path, fill="red", width=2)
-                img.show()
+                img.close()
                 #gif
                 md = 0
                 for i in range(len(path)-1) :
@@ -71,11 +72,13 @@ def main(mhost: string) :
                         letters = string.ascii_uppercase
                         gname = ''.join(random.choice(letters) for i in range(10))
                         img_tmp.save("./tmp/"+gname+".png")
-                        img_list.append(gname)
+                        img_list.append("./tmp/"+gname+".png")
                     md += d
                 print(md)
-                for i in range(img_list):
-                    
+                gimgs = (Image.open(f) for f in img_list)
+                print(img)
+                gimg = next(gimgs)
+                img.save(fp="./tmp/test.gif", format='GIF', append_images=gimgs, save_all=True, duration=200, loop=0)
 
                 return 0
         else:
