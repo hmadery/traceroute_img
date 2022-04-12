@@ -1,6 +1,3 @@
-# to do
-# add pygame animation option ? or gif with PIL ?
-
 # imports
 import random
 import string
@@ -20,7 +17,7 @@ import string
 import random
 
 
-# main
+# main
 def main(mhost: string) :
 
     host = mhost
@@ -50,12 +47,15 @@ def main(mhost: string) :
             except:
                 print("***\n")
             if rcv[0].src == host:
-                img = Image.open("simplemap.png")
-                draw = ImageDraw.Draw(img)
-                draw.line(path, fill="red", width=2)
-                img.close()
+                mpath = Image.open("simplemap.png")
+                draw = ImageDraw.Draw(mpath)
+                for i in path :
+                    draw.rectangle((i[0]-5, i[1]-5, i[0]+5, i[1]+5), fill = "blue", outline = "blue")
+                mpath.save('test.png')
+                mpath.close()
                 #gif
                 md = 0
+                mhops = 0
                 for i in range(len(path)-1) :
                     # pythagore
                     md_x = path[i+1][0] - path[i][0]
@@ -65,21 +65,26 @@ def main(mhost: string) :
                     m_x = md_x / hops
                     m_y = md_y / hops
                     for h in range(hops) :
-                        img_tmp = Image.open("simplemap.png")
+                        img_tmp = Image.open("test.png")
                         draw_tmp = ImageDraw.Draw(img_tmp)
-                        draw_tmp.ellipse((path[i][0]+m_x*h-10, path[i][1]+m_y*h-10, path[i][0]+m_x*h+10, path[i][1]+m_y*h+10), fill = 'red', outline ='red')
+                        draw_tmp.ellipse((path[i][0]+m_x*h-5, path[i][1]+m_y*h-5, path[i][0]+m_x*h+5, path[i][1]+m_y*h+5), fill = "black", outline = "black")
                         # name generation
                         letters = string.ascii_uppercase
                         gname = ''.join(random.choice(letters) for i in range(10))
                         img_tmp.save("./tmp/"+gname+".png")
                         img_list.append("./tmp/"+gname+".png")
+                    mhops += hops
                     md += d
-                print(md)
-                gimgs = (Image.open(f) for f in img_list)
-                print(img)
+                m_img_list = img_list
+                for i in reversed(img_list) :
+                    m_img_list.append(i)
+                gimgs = (Image.open(f) for f in m_img_list)
                 gimg = next(gimgs)
-                img.save(fp="./tmp/test.gif", format='GIF', append_images=gimgs, save_all=True, duration=200, loop=0)
-
+                gimg.save(fp="test.gif", format="GIF", append_images=gimgs, save_all=True, duration=0.5*mhops, loop=0)
+                print(len(img_list))
+                print(mhops)
+                for i in img_list :
+                    os.remove(i)
                 return 0
         else:
             print(f'hop{i} timeout.')
