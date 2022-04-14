@@ -73,16 +73,18 @@ def main(mhost: string) :
                         gname = ''.join(random.choice(letters) for i in range(10))
                         img_tmp.save("./tmp/"+gname+".png")
                         img_list.append("./tmp/"+gname+".png")
+                        img_tmp.close()
                     mhops += hops
                     md += d
-                m_img_list = img_list
+                m_img_list = []
+                # need to update
+                for i in img_list :
+                    m_img_list.append(i)
                 for i in reversed(img_list) :
                     m_img_list.append(i)
                 gimgs = (Image.open(f) for f in m_img_list)
                 gimg = next(gimgs)
                 gimg.save(fp="test.gif", format="GIF", append_images=gimgs, save_all=True, duration=0.5*mhops, loop=0)
-                print(len(img_list))
-                print(mhops)
                 for i in img_list :
                     os.remove(i)
                 return 0
