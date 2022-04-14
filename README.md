@@ -1,2 +1,2 @@
 # traceroute_img project
-![alt text](https://github.com/hmadery/traceroute_img/edit/main/example.gif)
+![example gif](https://github.com/hmadery/traceroute_img/blob/main/example.gif)
